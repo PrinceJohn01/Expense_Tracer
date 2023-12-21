@@ -1,8 +1,10 @@
+import 'package:expense_tracer/data/hive_database.dart';
 import 'package:expense_tracer/datetime/date_time_helper.dart';
+import 'package:flutter/foundation.dart';
 
 import '../model/expense_item.dart';
 
-class ExpenseDate {
+class ExpenseData extends ChangeNotifier {
   // list of all expenses
   List<ExpenseItem> overallExpenseList = [];
   //get expense list
@@ -10,14 +12,28 @@ class ExpenseDate {
     return overallExpenseList;
   }
 
+  //prepare data to display
+  final db = HiveDataBase();
+  void prepareData() {
+    if (db.readData().isNotEmpty) {
+      overallExpenseList = db.readData();
+    }
+  }
+
   //add new expense
   void addNewExpense(ExpenseItem newExpense) {
     overallExpenseList.add(newExpense);
+
+    notifyListeners();
+    db.saveData(overallExpenseList);
   }
 
   // delete expense
   void deleteExpense(ExpenseItem expense) {
     overallExpenseList.remove(expense);
+
+    notifyListeners();
+    db.saveData(overallExpenseList);
   }
 
   // get weekdays
@@ -52,7 +68,7 @@ class ExpenseDate {
     //go backwards from today to find sunday
     for (int i = 0; i < 7; i++) {
       if (getDayName(today.subtract(Duration(days: i))) == 'sun') {
-        startOfWeek = (today.subtract(Duration(days: i)));
+        startOfWeek = today.subtract(Duration(days: i));
       }
     }
     return startOfWeek!;

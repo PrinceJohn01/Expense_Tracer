@@ -1,7 +1,16 @@
+import 'package:expense_tracer/data/expense_data.dart';
 import 'package:expense_tracer/screens/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
+  //initialize hive
+  await Hive.initFlutter();
+
+  //open a hive box
+  await Hive.openBox("expense_database");
+
   runApp(const MyApp());
 }
 
@@ -11,14 +20,12 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Expense Tracker',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const HomeScreen(),
-    );
+    return ChangeNotifierProvider(
+        create: (context) => ExpenseData(),
+        builder: (context, child) => const MaterialApp(
+              title: 'Expense Tracker',
+              debugShowCheckedModeBanner: false,
+              home: HomeScreen(),
+            ));
   }
 }
